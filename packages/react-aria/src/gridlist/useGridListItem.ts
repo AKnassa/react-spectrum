@@ -142,6 +142,7 @@ export function useGridListItem<T>(props: AriaGridListItemOptions, state: ListSt
     linkBehavior
   });
 
+  // TODO: move away from capturing
   let onKeyDownCapture = (e: ReactKeyboardEvent) => {
     let activeElement = getActiveElement();
     if (!nodeContains(e.currentTarget, getEventTarget(e) as Element) || !ref.current || !activeElement) {

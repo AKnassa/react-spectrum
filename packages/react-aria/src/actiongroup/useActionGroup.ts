@@ -82,37 +82,39 @@ export function useActionGroup<T>(props: AriaActionGroupProps<T>, state: ListSta
         if (!nodeContains(e.currentTarget, getEventTarget(e))) {
           return false;
         }
+        let next;
         if (flipDirection) {
-          focusManager.focusPrevious({wrap: true});
+          next = focusManager.focusPrevious({wrap: true, action: 'ArrowRight'});
         } else {
-          focusManager.focusNext({wrap: true});
+          next = focusManager.focusNext({wrap: true, action: 'ArrowRight'});
         }
-        return true;
+        return next !== null;
       },
       'ArrowDown': (e) => {
         if (!nodeContains(e.currentTarget, getEventTarget(e))) {
           return false;
         }
-        focusManager.focusNext({wrap: true});
-        return true;
+        let next = focusManager.focusNext({wrap: true, action: 'ArrowDown'});
+        return next !== null;
       },
       'ArrowLeft': (e) => {
         if (!nodeContains(e.currentTarget, getEventTarget(e))) {
           return false;
         }
+        let next;
         if (flipDirection) {
-          focusManager.focusNext({wrap: true});
+          next = focusManager.focusNext({wrap: true, action: 'ArrowLeft'});
         } else {
-          focusManager.focusPrevious({wrap: true});
+          next = focusManager.focusPrevious({wrap: true, action: 'ArrowLeft'});
         }
-        return true;
+        return next !== null;
       },
       'ArrowUp': (e) => {
         if (!nodeContains(e.currentTarget, getEventTarget(e))) {
           return false;
         }
-        focusManager.focusPrevious({wrap: true});
-        return true;
+        let next = focusManager.focusPrevious({wrap: true, action: 'ArrowUp'});
+        return next !== null;
       }
     }
   });

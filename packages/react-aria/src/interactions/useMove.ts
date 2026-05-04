@@ -209,6 +209,7 @@ export function useMove(props: MoveEvents): MoveResult {
       };
     }
 
+    // TODO: move to useKeyboard?
     let triggerKeyboardMove = (e: EventBase, deltaX: number, deltaY: number) => {
       start();
       // eslint-disable-next-line react-hooks/rules-of-hooks

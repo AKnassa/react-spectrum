@@ -13,8 +13,9 @@
 import {AriaLabelingProps, Orientation, RefObject} from '@react-types/shared';
 import {createFocusManager} from '../focus/FocusScope';
 import {filterDOMProps} from '../utils/filterDOMProps';
-import {FocusEventHandler, HTMLAttributes, KeyboardEventHandler, useRef, useState} from 'react';
+import {FocusEventHandler, HTMLAttributes, useEffect, useRef, useState} from 'react';
 import {getActiveElement, getEventTarget, nodeContains} from '../utils/shadowdom/DOMFunctions';
+import {useKeyboard} from '../interactions/useKeyboard';
 import {useLayoutEffect} from '../utils/useLayoutEffect';
 import {useLocale} from '../i18n/I18nProvider';
 
@@ -56,49 +57,69 @@ export function useToolbar(props: AriaToolbarProps, ref: RefObject<HTMLElement |
   const shouldReverse = direction === 'rtl' && orientation === 'horizontal';
   let focusManager = createFocusManager(ref);
 
-  const onKeyDown: KeyboardEventHandler = (e) => {
-    // don't handle portalled events
-    if (!nodeContains(e.currentTarget, getEventTarget(e) as HTMLElement)) {
-      return;
-    }
-    if (
-      (orientation === 'horizontal' && e.key === 'ArrowRight')
-      || (orientation === 'vertical' && e.key === 'ArrowDown')) {
-      if (shouldReverse) {
-        focusManager.focusPrevious();
-      } else {
-        focusManager.focusNext();
+  useEffect(() => {
+    const onFocusManagerFocusWrap = (e: CustomEvent<{action: string}>) => {
+      if ((orientation === 'horizontal' && (e.detail.action === 'ArrowRight' || e.detail.action === 'ArrowLeft'))
+       || (orientation === 'vertical' && (e.detail.action === 'ArrowDown' || e.detail.action === 'ArrowUp'))) {
+        e.preventDefault();
       }
-    } else if (
-      (orientation === 'horizontal' && e.key === 'ArrowLeft')
-      || (orientation === 'vertical' && e.key === 'ArrowUp')) {
-      if (shouldReverse) {
-        focusManager.focusNext();
-      } else {
-        focusManager.focusPrevious();
-      }
-    } else if (e.key === 'Tab') {
-      // When the tab key is pressed, we want to move focus
-      // out of the entire toolbar. To do this, move focus
-      // to the first or last focusable child, and let the
-      // browser handle the Tab key as usual from there.
-      e.stopPropagation();
-      lastFocused.current = getActiveElement() as HTMLElement;
-      if (e.shiftKey) {
-        focusManager.focusFirst();
-      } else {
-        focusManager.focusLast();
-      }
-      return;
-    } else {
-      // if we didn't handle anything, return early so we don't preventDefault
-      return;
-    }
+    };
+    let toolbar = ref.current;
+    toolbar?.addEventListener('focus-manager-focus-wrap', onFocusManagerFocusWrap as EventListener);
+    return () => toolbar?.removeEventListener('focus-manager-focus-wrap', onFocusManagerFocusWrap as EventListener);
+  }, [ref, orientation]);
 
-    // Prevent arrow keys from being handled by nested action groups.
-    e.stopPropagation();
-    e.preventDefault();
-  };
+  let {keyboardProps} = useKeyboard({
+    ignorePortalRef: ref,
+    shortcuts: {
+      'ArrowRight': () => {
+        if (orientation === 'horizontal') {
+          if (shouldReverse) {
+            focusManager.focusPrevious();
+          } else {
+            focusManager.focusNext();
+          }
+          return true;
+        }
+        return false;
+      },
+      'ArrowLeft': () => {
+        if (orientation === 'horizontal') {
+          if (shouldReverse) {
+            focusManager.focusNext();
+          } else {
+            focusManager.focusPrevious();
+          }
+          return true;
+        }
+        return false;
+      },
+      'ArrowDown': () => {
+        if (orientation === 'vertical') {
+          focusManager.focusNext();
+          return true;
+        }
+        return false;
+      },
+      'ArrowUp': () => {
+        if (orientation === 'vertical') {
+          focusManager.focusPrevious();
+          return true;
+        }
+        return false;
+      },
+      'Tab': () => {
+        lastFocused.current = getActiveElement() as HTMLElement;
+        focusManager.focusLast();
+        return {shouldPreventDefault: false, shouldContinuePropagation: false};
+      },
+      'Shift+Tab': () => {
+        lastFocused.current = getActiveElement() as HTMLElement;
+        focusManager.focusFirst();
+        return {shouldPreventDefault: false, shouldContinuePropagation: false};
+      }
+    }
+  });
 
   // Record the last focused child when focus moves out of the toolbar.
   const lastFocused = useRef<HTMLElement | null>(null);
@@ -125,7 +146,8 @@ export function useToolbar(props: AriaToolbarProps, ref: RefObject<HTMLElement |
       'aria-orientation': orientation,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabel == null ? ariaLabelledBy : undefined,
-      onKeyDownCapture: !isInToolbar ? onKeyDown : undefined,
+      onKeyDown: !isInToolbar ? keyboardProps.onKeyDown : undefined,
+      onKeyUp: !isInToolbar ? keyboardProps.onKeyUp : undefined,
       onFocusCapture: !isInToolbar ? onFocus : undefined,
       onBlurCapture: !isInToolbar ? onBlur : undefined
     }

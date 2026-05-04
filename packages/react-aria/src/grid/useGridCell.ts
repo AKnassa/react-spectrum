@@ -112,6 +112,7 @@ export function useGridCell<T, C extends GridCollection<T>>(props: GridCellProps
     isDisabled: state.collection.size === 0
   });
 
+  // TODO: move away from capturing
   let onKeyDownCapture = (e: ReactKeyboardEvent) => {
     let activeElement = getActiveElement();
     if (!nodeContains(e.currentTarget, getEventTarget(e) as Element) || state.isKeyboardNavigationDisabled || !ref.current || !activeElement) {
