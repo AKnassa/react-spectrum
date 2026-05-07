@@ -292,6 +292,9 @@ function GridListInner<T extends object>({props, collection, gridListRef: ref}: 
     <FocusScope>
       <dom.div
         {...mergeProps(DOMProps, renderProps, gridProps, focusProps, droppableCollection?.collectionProps, emptyStatePropOverrides)}
+        // TODO: testing these for auto thread announcements
+        aria-live={props['aria-live']}
+        aria-relevant={props['aria-relevant']}
         ref={ref as RefObject<HTMLDivElement>}
         slot={props.slot || undefined}
         onScroll={props.onScroll}
