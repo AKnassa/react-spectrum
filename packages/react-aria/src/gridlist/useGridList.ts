@@ -99,7 +99,8 @@ export interface AriaGridListOptions<T> extends Omit<AriaGridListProps<T>, 'chil
    * - 'override': links override all other interactions (link items are not selectable).
    * @default 'action'
    */
-  linkBehavior?: 'action' | 'selection' | 'override'
+  linkBehavior?: 'action' | 'selection' | 'override',
+  focusOnEntry?: 'first' | 'last'
 }
 
 export interface GridListAria {
@@ -144,7 +145,8 @@ export function useGridList<T>(props: AriaGridListOptions<T>, state: ListState<T
     linkBehavior,
     disallowTypeAhead,
     autoFocus: props.autoFocus,
-    escapeKeyBehavior
+    escapeKeyBehavior,
+    focusOnEntry: props.focusOnEntry
   });
 
   let id = useId(props.id);

@@ -133,7 +133,12 @@ export interface GridListProps<T> extends Omit<AriaGridListProps<T>, 'children'>
    * The primary orientation of the items. Usually this is the direction that the collection scrolls.
    * @default 'vertical'
    */
-  orientation?: Orientation
+  orientation?: Orientation,
+  // TODO: for testing, but this makes it so we can force tab entry into a collection to the first or last item
+  // this is for the AI thread component since we want shift tab and tab to both go to the newest message
+  // debatable if we should also have this clear the "last focused key" behavior that collections has since I feel like users
+  // want to always to go the newest message from the input field
+  focusOnEntry?: 'first' | 'last'
 }
 
 
@@ -163,7 +168,7 @@ interface GridListInnerProps<T extends object> {
 function GridListInner<T extends object>({props, collection, gridListRef: ref}: GridListInnerProps<T>) {
   [props, ref] = useContextProps(props, ref, SelectableCollectionContext);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let {shouldUseVirtualFocus, filter, disallowTypeAhead, ...DOMCollectionProps} = props;
+  let {shouldUseVirtualFocus, filter, disallowTypeAhead, focusOnEntry, ...DOMCollectionProps} = props;
   let {dragAndDropHooks, keyboardNavigationBehavior = 'arrow', layout = 'stack', orientation = 'vertical'} = props;
   let {CollectionRoot, isVirtualized, layoutDelegate, dropTargetDelegate: ctxDropTargetDelegate} = useContext(CollectionRendererContext);
   let gridlistState = useListState({
@@ -198,7 +203,8 @@ function GridListInner<T extends object>({props, collection, gridListRef: ref}: 
     keyboardNavigationBehavior: layout === 'grid' ? 'tab' : keyboardNavigationBehavior,
     isVirtualized,
     shouldSelectOnPressUp: props.shouldSelectOnPressUp,
-    disallowTypeAhead
+    disallowTypeAhead,
+    focusOnEntry
   }, filteredState, ref);
 
   let selectionManager = filteredState.selectionManager;
