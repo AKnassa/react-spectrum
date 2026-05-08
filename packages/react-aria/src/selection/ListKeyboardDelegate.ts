@@ -12,6 +12,7 @@
 
 import {Collection, Direction, DisabledBehavior, Key, KeyboardDelegate, LayoutDelegate, Node, Orientation, Rect, RefObject} from '@react-types/shared';
 import {DOMLayoutDelegate} from './DOMLayoutDelegate';
+import {getItemElement} from './utils';
 import {isScrollable} from '../utils/isScrollable';
 
 interface ListKeyboardDelegateOptions<T> {
@@ -132,9 +133,36 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
     return prevRect.x === itemRect.x || prevRect.y !== itemRect.y;
   }
 
+  // TODO: still need to see how this works with virtualizer once there is handling for the reverse layout
+  // also need to double check why page up/down doesnt work well, maybe the column reverse?
+  // this felt like a simpler approach then changing getKeyAbove/Below to be purely spatial calculations (aka going through the collection
+  // and finding the item that is closest spatially above/below)
+  private isReversed(key: Key): boolean {
+    let nextKey = this.getNextKey(key);
+    let currentEl = getItemElement(this.ref, key);
+    if (nextKey != null) {
+      let nextEl = getItemElement(this.ref, nextKey);
+      if (!currentEl || !nextEl) {
+        return false;
+      }
+      return currentEl.getBoundingClientRect().top > nextEl.getBoundingClientRect().top;
+    }
+    let prevKey = this.getPreviousKey(key);
+    if (prevKey != null) {
+      let prevEl = getItemElement(this.ref, prevKey);
+      if (!currentEl || !prevEl) {
+        return false;
+      }
+      return prevEl.getBoundingClientRect().top > currentEl.getBoundingClientRect().top;
+    }
+    return false;
+  }
+
   getKeyBelow(key: Key): Key | null {
     if (this.layout === 'grid' && this.orientation === 'vertical') {
       return this.findKey(key, (key) => this.getNextKey(key), this.isSameRow);
+    } else if (this.orientation === 'vertical') {
+      return this.isReversed(key) ? this.getPreviousKey(key) : this.getNextKey(key);
     } else {
       return this.getNextKey(key);
     }
@@ -143,6 +171,8 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
   getKeyAbove(key: Key): Key | null {
     if (this.layout === 'grid' && this.orientation === 'vertical') {
       return this.findKey(key, (key) => this.getPreviousKey(key), this.isSameRow);
+    } else if (this.orientation === 'vertical') {
+      return this.isReversed(key) ? this.getNextKey(key) : this.getPreviousKey(key);
     } else {
       return this.getPreviousKey(key);
     }
