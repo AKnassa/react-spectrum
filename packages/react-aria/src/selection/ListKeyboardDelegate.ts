@@ -241,6 +241,8 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
       return null;
     }
 
+    let reversed = this.isReversed(key);
+
     if (menu && !isScrollable(menu)) {
       return this.getFirstKey();
     }
@@ -254,7 +256,12 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
         itemRect = nextKey == null ? null : this.layoutDelegate.getItemRect(nextKey);
       }
     } else {
-      let pageY = Math.max(0, itemRect.y + itemRect.height - this.layoutDelegate.getVisibleRect().height);
+      let visibleRect = this.layoutDelegate.getVisibleRect();
+      // TODO: column reverse makes y negative for items so we need to instead do current pos - height instead
+      // will need to revist for virtualized reverse layouts?
+      let pageY = reversed
+        ? itemRect.y - visibleRect.height
+        : Math.max(0, itemRect.y + itemRect.height - visibleRect.height);
 
       while (itemRect && itemRect.y > pageY && nextKey != null) {
         nextKey = this.getKeyAbove(nextKey);
@@ -262,7 +269,8 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
       }
     }
 
-    return nextKey ?? this.getFirstKey();
+    // TODO: in column reverse, the top most key is the last key
+    return nextKey ?? (reversed ? this.getLastKey() : this.getFirstKey());
   }
 
   getKeyPageBelow(key: Key): Key | null {
@@ -272,8 +280,11 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
       return null;
     }
 
+    let reversed = this.isReversed(key);
+
     if (menu && !isScrollable(menu)) {
       return this.getLastKey();
+      // return reversed ? this.getFirstKey() : this.getLastKey();
     }
 
     let nextKey: Key | null = key;
@@ -293,7 +304,8 @@ export class ListKeyboardDelegate<T> implements KeyboardDelegate {
       }
     }
 
-    return nextKey ?? this.getLastKey();
+    // TODO: in column reverse, the bottom most key is the first key
+    return nextKey ?? (reversed ? this.getFirstKey() : this.getLastKey());
   }
 
   getKeyForSearch(search: string, fromKey?: Key): Key | null {
