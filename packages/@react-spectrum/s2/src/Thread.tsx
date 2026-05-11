@@ -24,7 +24,6 @@ interface ThreadProps<T extends object> extends Pick<GridListProps<T>, 'items' |
 // chatgpt, claude, other AI assistants to see their UX
 // they each don't seem to use column-reverse
 
-
 // TODO: things to figure out/try
 // column reverse layout? is it a problem that the expectation becomes that the first item in the items
 // array is now the most recent item in the stream? Also shift tabbing will move to the top of the list since that is the item
@@ -44,10 +43,9 @@ interface ThreadProps<T extends object> extends Pick<GridListProps<T>, 'items' |
 // make prompt field accept enter to submit the prompt, and have Option + Enter make a new line instead,  mimics
 // other ai chat experiences
 
-export const Thread = /*#__PURE__*/ (forwardRef as forwardRefType)(function Thread<T extends object>(
-  props: ThreadProps<T>,
-  ref: DOMRef<HTMLDivElement>
-) {
+export const Thread = /*#__PURE__*/ (forwardRef as forwardRefType)(function Thread<
+  T extends object
+>(props: ThreadProps<T>, ref: DOMRef<HTMLDivElement>) {
   let {children, items} = props;
   let domRef = useDOMRef(ref);
   let isNearBottomRef = useRef(true);
@@ -104,9 +102,7 @@ export const Thread = /*#__PURE__*/ (forwardRef as forwardRefType)(function Thre
             bottom: 16,
             left: '50%'
           })}>
-          <ActionButton
-            aria-label="Scroll to bottom"
-            onPress={scrollToBottom}>
+          <ActionButton aria-label="Scroll to bottom" onPress={scrollToBottom}>
             <ChevronDown />
           </ActionButton>
         </div>

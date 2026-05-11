@@ -15,7 +15,19 @@ import {ActionMenu} from '../src/ActionMenu';
 import {AssetCard} from '../src/Card';
 import {baseColor, css, focusRing, style} from '../style' with {type: 'macro'};
 import {Button} from '../src/Button';
-import {ButtonContext, GridListItem, Group, isFileDropItem, Label, Tag, TagGroup, TagList, TextArea, TextField, useDrop} from 'react-aria-components';
+import {
+  ButtonContext,
+  GridListItem,
+  Group,
+  isFileDropItem,
+  Label,
+  Tag,
+  TagGroup,
+  TagList,
+  TextArea,
+  TextField,
+  useDrop
+} from 'react-aria-components';
 import {Card, CardPreview} from '../src/Card';
 import CheckmarkCircle from '@react-spectrum/s2/icons/CheckmarkCircle';
 import ChevronRight from '@react-spectrum/s2/icons/ArrowCurved';
@@ -44,7 +56,7 @@ const meta: Meta<typeof Thread> = {
   tags: ['autodocs'],
   title: 'Thread',
   decorators: [
-    (Story) => (
+    Story => (
       <div style={{width: '800px', height: '700px'}}>
         <Story />
       </div>
@@ -89,13 +101,24 @@ export function StaticThread() {
           </div>
         </SystemMessage>
         <ResponseStatus status="pending" />
-        <UserMessage>Can you help me create a 45-minute presentation, with animations, for an executive update?</UserMessage>
+        <UserMessage>
+          Can you help me create a 45-minute presentation, with animations, for an executive update?
+        </UserMessage>
         <SystemMessage>
           <div role="document">
-            <h3 className={style({font: 'heading-sm'})}>Big idea/core narrative: The warmth of welcome</h3>
-            <p className={style({font: 'body'})}>Hospitality begins the moment our customers set foot off their plane. We are more than accommodation, and we service a diverse base. We hope to be the anchor and bounce board for all who stay with us. </p>
+            <h3 className={style({font: 'heading-sm'})}>
+              Big idea/core narrative: The warmth of welcome
+            </h3>
+            <p className={style({font: 'body'})}>
+              Hospitality begins the moment our customers set foot off their plane. We are more than
+              accommodation, and we service a diverse base. We hope to be the anchor and bounce
+              board for all who stay with us.{' '}
+            </p>
             <h4 className={style({font: 'heading-xs'})}>Belonging happens at Hilton</h4>
-            <p className={style({font: 'body'})}>We strive to be familiar but exceed expectations. These assets highlight how belonging is personified.</p>
+            <p className={style({font: 'body'})}>
+              We strive to be familiar but exceed expectations. These assets highlight how belonging
+              is personified.
+            </p>
             <h4 className={style({font: 'heading-xs'})}>We are more than accommodation</h4>
             <ul className={style({font: 'body'})}>
               <li>Airport pick up service</li>
@@ -113,8 +136,13 @@ export function StaticThread() {
             </SourceList>
           </Sources>
         </SystemMessage>
-        <ResponseStatus status="complete" thinking="The user said make a presentation deck but didn't specify duration of deck. Assumption is a brief presentation. I should check previous Hilton executive presentation decks and extract the structure." />
-        <UserMessage>Can you help me create a 45-minute presentation, with animations, for an executive update?</UserMessage>
+        <ResponseStatus
+          status="complete"
+          thinking="The user said make a presentation deck but didn't specify duration of deck. Assumption is a brief presentation. I should check previous Hilton executive presentation decks and extract the structure."
+        />
+        <UserMessage>
+          Can you help me create a 45-minute presentation, with animations, for an executive update?
+        </UserMessage>
         <SystemMessage>
           <AssetCard>
             <CardPreview>
@@ -131,7 +159,9 @@ export function StaticThread() {
             </Content>
           </AssetCard>
         </SystemMessage>
-        <UserMessage>Can you help me create a 45-minute presentation, with animations, for an executive update?</UserMessage>
+        <UserMessage>
+          Can you help me create a 45-minute presentation, with animations, for an executive update?
+        </UserMessage>
         <UserMessage>
           <Card variant="quiet">
             <CardPreview>
@@ -161,8 +191,8 @@ let dummyResponses = [
 ];
 
 type Message =
-  | {id: number, type: 'user' | 'system', content: string}
-  | {id: number, type: 'status', status: 'pending' | 'complete'};
+  | {id: number; type: 'user' | 'system'; content: string}
+  | {id: number; type: 'status'; status: 'pending' | 'complete'};
 
 export function DynamicThread() {
   let [messages, setMessages] = useState<Message[]>([]);
@@ -222,7 +252,13 @@ export function DynamicThread() {
 }
 
 // TODO: all of the below was copied from rsp-prototypes, just filler for now
-function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isDisabled?: boolean}) {
+function PromptField({
+  onSend,
+  isDisabled
+}: {
+  onSend?: (text: string) => void;
+  isDisabled?: boolean;
+}) {
   let [text, setText] = useState('');
   let [attachments, setAttachments] = useState([
     {
@@ -240,11 +276,13 @@ function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isD
     ref: inputRef,
     hasDropButton: true,
     async onDrop(e) {
-      let files = await Promise.all(e.items.filter(isFileDropItem).map(async item => ({
-        image: item.type.startsWith('image/') ? URL.createObjectURL(await item.getFile()) : '',
-        title: item.name,
-        description: item.type
-      })));
+      let files = await Promise.all(
+        e.items.filter(isFileDropItem).map(async item => ({
+          image: item.type.startsWith('image/') ? URL.createObjectURL(await item.getFile()) : '',
+          title: item.name,
+          description: item.type
+        }))
+      );
       setAttachments(attachments => [...attachments, ...files]);
     }
   });
@@ -254,23 +292,25 @@ function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isD
       <Group
         {...dropProps}
         role="group"
-        className={renderProps => style({
-          ...focusRing(),
-          padding: 16,
-          boxShadow: 'emphasized',
-          backgroundColor: {
-            default: 'elevated',
-            isDropTarget: 'blue-200'
-          },
-          borderRadius: 'lg',
-          borderWidth: 2,
-          borderStyle: 'solid',
-          borderColor: {
-            default: 'transparent',
-            isFocusWithin: 'gray-900',
-            isDropTarget: 'blue-800'
-          }
-        })({...renderProps, isDropTarget})}>
+        className={renderProps =>
+          style({
+            ...focusRing(),
+            padding: 16,
+            boxShadow: 'emphasized',
+            backgroundColor: {
+              default: 'elevated',
+              isDropTarget: 'blue-200'
+            },
+            borderRadius: 'lg',
+            borderWidth: 2,
+            borderStyle: 'solid',
+            borderColor: {
+              default: 'transparent',
+              isFocusWithin: 'gray-900',
+              isDropTarget: 'blue-800'
+            }
+          })({...renderProps, isDropTarget})
+        }>
         <AttachmentList>
           {attachments.map((attachment, i) => (
             <Attachment
@@ -279,10 +319,11 @@ function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isD
               id={i}
               onRemove={() => {
                 setAttachments(attachments.slice(0, i).concat(attachments.slice(i + 1)));
-              }} />
+              }}
+            />
           ))}
         </AttachmentList>
-        <TextField value={text} onChange={(value) => setText(value)}>
+        <TextField value={text} onChange={value => setText(value)}>
           <Label
             className={style({
               display: 'block',
@@ -310,9 +351,16 @@ function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isD
               width: 'full',
               outlineStyle: 'none',
               borderStyle: 'none'
-            })} />
+            })}
+          />
         </TextField>
-        <div className={style({display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16})}>
+        <div
+          className={style({
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 16
+          })}>
           <ActionButton isQuiet aria-label="Add">
             <Plus />
           </ActionButton>
@@ -328,12 +376,20 @@ function PromptField({onSend, isDisabled}: {onSend?: (text: string) => void, isD
           </Button>
         </div>
       </Group>
-      <p className={style({font: 'ui-sm', textAlign: 'center'})}>Responses are generated using AI, and may be inaccurate. Check before using. <Link variant="secondary" href="https://www.adobe.com/legal/licenses-terms/adobe-gen-ai-user-guidelines.html" target="_blank">AI User Guidelines</Link></p>
+      <p className={style({font: 'ui-sm', textAlign: 'center'})}>
+        Responses are generated using AI, and may be inaccurate. Check before using.{' '}
+        <Link
+          variant="secondary"
+          href="https://www.adobe.com/legal/licenses-terms/adobe-gen-ai-user-guidelines.html"
+          target="_blank">
+          AI User Guidelines
+        </Link>
+      </p>
     </div>
   );
 }
 
-function AttachmentList({children}: { children: ReactNode }) {
+function AttachmentList({children}: {children: ReactNode}) {
   return (
     <TagGroup aria-label="Attachments">
       <TagList
@@ -349,16 +405,32 @@ function AttachmentList({children}: { children: ReactNode }) {
   );
 }
 
-function Attachment({id, image, title, description, onRemove}: {id: number, image: string, title: string, description: string, onRemove: () => void}) {
+function Attachment({
+  id,
+  image,
+  title,
+  description,
+  onRemove
+}: {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  onRemove: () => void;
+}) {
   return (
     <Tag id={id} textValue={title} className={style({...focusRing(), borderRadius: 'default'})}>
       {/* TODO: support rendering cards as tags/gridlist items directly */}
       <Card variant="secondary">
         {/* TODO: horizontal cards */}
-        <div className={style({display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center'})}>
-          {image && <Image
-            src={image}
-            styles={style({borderRadius: 'default', objectFit: 'cover', height: 50, width: 50})} />}
+        <div
+          className={style({display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center'})}>
+          {image && (
+            <Image
+              src={image}
+              styles={style({borderRadius: 'default', objectFit: 'cover', height: 50, width: 50})}
+            />
+          )}
           <Content styles={style({padding: 0})}>
             <Text slot="title">{title}</Text>
             <Text slot="description">{description}</Text>
@@ -369,7 +441,8 @@ function Attachment({id, image, title, description, onRemove}: {id: number, imag
               size="S"
               aria-label="Remove attachment"
               onPress={onRemove}
-              styles={style({alignSelf: 'start', marginTop: -12, marginEnd: -12})} />
+              styles={style({alignSelf: 'start', marginTop: -12, marginEnd: -12})}
+            />
           </ButtonContext>
         </div>
       </Card>
@@ -377,8 +450,7 @@ function Attachment({id, image, title, description, onRemove}: {id: number, imag
   );
 }
 
-
-function UserMessage({children, textValue = ' '}: {children: ReactNode, textValue?: string}) {
+function UserMessage({children, textValue = ' '}: {children: ReactNode; textValue?: string}) {
   return (
     <GridListItem
       textValue={textValue}
@@ -396,9 +468,11 @@ function UserMessage({children, textValue = ' '}: {children: ReactNode, textValu
   );
 }
 
-function SystemMessage({children, textValue = ' '}: {children: ReactNode, textValue?: string}) {
+function SystemMessage({children, textValue = ' '}: {children: ReactNode; textValue?: string}) {
   return (
-    <GridListItem textValue={textValue} className={style({...focusRing(), borderRadius: 'default'})}>
+    <GridListItem
+      textValue={textValue}
+      className={style({...focusRing(), borderRadius: 'default'})}>
       {children}
     </GridListItem>
   );
@@ -417,44 +491,61 @@ function MessageFeedback() {
   );
 }
 
-function ResponseStatus({status, thinking}: { status: 'pending' | 'complete', thinking?: string }) {
+function ResponseStatus({status, thinking}: {status: 'pending' | 'complete'; thinking?: string}) {
   switch (status) {
     case 'pending':
       return (
         // TODO: check announcement w/ and w/o the textValue
         // It announces just fine w/o the text value but still useful for typeahead
-        <GridListItem textValue="Generating response" className={style({...focusRing(), borderRadius: 'sm', display: 'flex', alignItems: 'center', gap: 8})}>
+        <GridListItem
+          textValue="Generating response"
+          className={style({
+            ...focusRing(),
+            borderRadius: 'sm',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          })}>
           <ProgressCircle isIndeterminate size="S" aria-label="Generating response" />
-          <span className={style({font: 'ui', color: 'neutral-subdued'})}>Generating response...</span>
+          <span className={style({font: 'ui', color: 'neutral-subdued'})}>
+            Generating response...
+          </span>
         </GridListItem>
       );
     case 'complete':
       return (
         // TODO: maybe we need focusMode="child"?
         // TODO: check announcement w/ and w/o the textValue, if it autofocused the child that would change behavior
-        <GridListItem textValue="Response generated" className={style({...focusRing(), borderRadius: 'default', display: 'flex', alignItems: 'center', gap: 8})}>
-          {thinking
-            ? (
-              <Disclosure size="S" isQuiet>
-                <DisclosureHeader UNSAFE_style={{width: 'fit-content'}}>
-                  <DisclosureTitle>
-                    <span className={style({display: 'flex', alignItems: 'center', gap: 8})}>
-                      Response generated <CheckmarkCircle />
-                    </span>
-                  </DisclosureTitle>
-                </DisclosureHeader>
-                <DisclosurePanel>
-                  <p className={style({font: 'body-sm'})}>{thinking}</p>
-                </DisclosurePanel>
-              </Disclosure>
-            )
-            : (
-              <>
-                <span className={style({font: 'ui', color: 'neutral-subdued'})}>Generating response...</span>
-                <CheckmarkCircle />
-              </>
-            )
-          }
+        <GridListItem
+          textValue="Response generated"
+          className={style({
+            ...focusRing(),
+            borderRadius: 'default',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          })}>
+          {thinking ? (
+            <Disclosure size="S" isQuiet>
+              <DisclosureHeader UNSAFE_style={{width: 'fit-content'}}>
+                <DisclosureTitle>
+                  <span className={style({display: 'flex', alignItems: 'center', gap: 8})}>
+                    Response generated <CheckmarkCircle />
+                  </span>
+                </DisclosureTitle>
+              </DisclosureHeader>
+              <DisclosurePanel>
+                <p className={style({font: 'body-sm'})}>{thinking}</p>
+              </DisclosurePanel>
+            </Disclosure>
+          ) : (
+            <>
+              <span className={style({font: 'ui', color: 'neutral-subdued'})}>
+                Generating response...
+              </span>
+              <CheckmarkCircle />
+            </>
+          )}
         </GridListItem>
       );
   }
@@ -466,16 +557,22 @@ function Sources({children}: {children: ReactNode}) {
       <DisclosureHeader UNSAFE_style={{width: 'fit-content'}}>
         <DisclosureTitle>Sources</DisclosureTitle>
       </DisclosureHeader>
-      <DisclosurePanel>
-        {children}
-      </DisclosurePanel>
+      <DisclosurePanel>{children}</DisclosurePanel>
     </Disclosure>
   );
 }
 
 function SourceList({children}: {children: ReactNode}) {
   return (
-    <ol style={{counterReset: 'step'}} className={style({display: 'flex', flexDirection: 'column', rowGap: 4, paddingStart: 0, margin: 0})}>
+    <ol
+      style={{counterReset: 'step'}}
+      className={style({
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: 4,
+        paddingStart: 0,
+        margin: 0
+      })}>
       {children}
     </ol>
   );
@@ -489,17 +586,21 @@ function SourceListItem(props: LinkProps) {
         listStyleType: 'none'
       })}>
       <span
-        className={css('&::before { content: counter(step) }') + style({
-          fontWeight: 'normal',
-          borderRadius: 'sm',
-          backgroundColor: 'gray-100',
-          display: 'inline-block',
-          paddingX: 8,
-          height: '[1lh]',
-          textAlign: 'center',
-          font: 'body-sm',
-          marginEnd: 8
-        })} />
+        className={
+          css('&::before { content: counter(step) }') +
+          style({
+            fontWeight: 'normal',
+            borderRadius: 'sm',
+            backgroundColor: 'gray-100',
+            display: 'inline-block',
+            paddingX: 8,
+            height: '[1lh]',
+            textAlign: 'center',
+            font: 'body-sm',
+            marginEnd: 8
+          })
+        }
+      />
       <Link {...props} variant="secondary" isStandalone />
     </li>
   );
