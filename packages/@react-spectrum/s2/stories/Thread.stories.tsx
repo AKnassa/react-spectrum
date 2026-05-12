@@ -17,6 +17,7 @@ import {baseColor, css, focusRing, style} from '../style' with {type: 'macro'};
 import {Button} from '../src/Button';
 import {
   ButtonContext,
+  GridList,
   GridListItem,
   Group,
   isFileDropItem,
@@ -30,23 +31,26 @@ import {
 } from 'react-aria-components';
 import {Card, CardPreview} from '../src/Card';
 import CheckmarkCircle from '@react-spectrum/s2/icons/CheckmarkCircle';
+import ChevronDown from '../s2wf-icons/S2_Icon_ChevronDown_20_N.svg';
 import ChevronRight from '@react-spectrum/s2/icons/ArrowCurved';
 import {CloseButton} from '../src/CloseButton';
 import {Content, Text} from '../src/Content';
 import {Disclosure, DisclosureHeader, DisclosurePanel, DisclosureTitle} from '../src/Disclosure';
 import {Image} from '../src/Image';
 import {Link, LinkProps} from '../src/Link';
+import {ListLayout} from 'react-stately/useVirtualizerState';
 import {MenuItem} from '../src/Menu';
 import type {Meta} from '@storybook/react';
 import Plus from '@react-spectrum/s2/icons/Add';
 import {ProgressCircle} from '../src/ProgressCircle';
-import {ReactNode, useRef, useState} from 'react';
+import {ReactNode, useEffect, useRef, useState} from 'react';
 import Send from '@react-spectrum/s2/icons/ArrowUpSend';
 import {Thread} from '../src/Thread';
 import ThumbDown from '@react-spectrum/s2/icons/ThumbDown';
 import ThumbUp from '@react-spectrum/s2/icons/ThumbUp';
 import {ToggleButton} from '../src/ToggleButton';
 import {ToggleButtonGroup} from '../src/ToggleButtonGroup';
+import {Virtualizer} from 'react-aria-components/Virtualizer';
 
 const meta: Meta<typeof Thread> = {
   component: Thread,
@@ -194,9 +198,24 @@ type Message =
   | {id: number; type: 'user' | 'system'; content: string}
   | {id: number; type: 'status'; status: 'pending' | 'complete'};
 
+let initialResponses = [
+  {id: 0, type: 'user', content: 'prompt 1'},
+  {id: 1, type: 'system', content: dummyResponses[0]},
+  {id: 2, type: 'user', content: 'prompt 2'},
+  {id: 3, type: 'system', content: dummyResponses[1]},
+  {id: 4, type: 'user', content: 'prompt 3'},
+  {id: 5, type: 'system', content: dummyResponses[2]},
+  {id: 6, type: 'user', content: 'prompt 4'},
+  {id: 7, type: 'system', content: dummyResponses[0]},
+  {id: 8, type: 'user', content: 'prompt 5'},
+  {id: 9, type: 'system', content: dummyResponses[1]},
+  {id: 10, type: 'user', content: 'prompt 6'},
+  {id: 11, type: 'system', content: dummyResponses[2]},
+] as Message[];
+
 export function DynamicThread() {
-  let [messages, setMessages] = useState<Message[]>([]);
-  let nextId = useRef(0);
+  let [messages, setMessages] = useState<Message[]>(initialResponses);
+  let nextId = useRef(initialResponses.length);
   let lastMessage = messages.at(-1);
   let isPending = lastMessage?.type === 'status' && lastMessage.status === 'pending';
 
@@ -246,6 +265,82 @@ export function DynamicThread() {
           );
         }}
       </Thread>
+      <PromptField onSend={handleSend} isDisabled={isPending} />
+    </div>
+  );
+}
+
+export function VirtualizedThread() {
+  let [messages, setMessages] = useState<Message[]>(initialResponses);
+  let nextId = useRef(initialResponses.length);
+  let lastMessage = messages.at(-1);
+  let isPending = lastMessage?.type === 'status' && lastMessage.status === 'pending';
+
+  function handleSend(text: string) {
+    if (!text.trim()) {
+      return;
+    }
+    setMessages(prev => [
+      ...prev,
+      {id: nextId.current++, type: 'user', content: text},
+      {id: nextId.current++, type: 'status', status: 'pending'}
+    ]);
+    setTimeout(() => {
+      let response = dummyResponses[Math.floor(Math.random() * dummyResponses.length)];
+      setMessages(prev => [
+        ...prev.slice(0, -1),
+        {id: nextId.current++, type: 'system', content: response}
+      ]);
+    }, 1500);
+  }
+
+  return (
+    <div
+      className={style({
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        flexGrow: 1
+      })}>
+      {/* TODO: move this Virtualizer into the Thread component eventually when we get column reverse support */}
+      <Virtualizer
+        layout={ListLayout}
+        layoutOptions={{estimatedRowHeight: 100}}>
+        <GridList
+          aria-label="Chat thread"
+          // TODO: try this, but it most likely won't work
+          // replace with LiveAnnouncer or an aria-live region populated with just the new items (remove the items once the announcement finishes)?
+          // aria-live="polite"
+          // aria-relevant="additions"
+          keyboardNavigationBehavior="tab"
+          focusOnEntry="last"
+          items={messages}
+          className={style({
+            height: 400,
+            paddingX: 4,
+            overflow: 'auto',
+            marginBottom: 8
+          })}>
+          {/* TODO style these so that they don't become full width in a virtualizer (or at least dont appear visually to be full width) */}
+          {msg => {
+            if (msg.type === 'user') {
+              return <UserMessage textValue={msg.content}>{msg.content}</UserMessage>;
+            }
+            if (msg.type === 'status') {
+              return <ResponseStatus status={msg.status} />;
+            }
+            return (
+              <SystemMessage textValue={msg.content}>
+                <div role="document">
+                  <p className={style({font: 'body'})}>{msg.content}</p>
+                </div>
+                <MessageFeedback />
+              </SystemMessage>
+            );
+          }}
+        </GridList>
+      </Virtualizer>
       <PromptField onSend={handleSend} isDisabled={isPending} />
     </div>
   );
