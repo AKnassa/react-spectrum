@@ -423,9 +423,6 @@ function GridListInner<T extends object>({
           droppableCollection?.collectionProps,
           emptyStatePropOverrides
         )}
-        // TODO: testing these for auto thread announcements
-        aria-live={props['aria-live']}
-        aria-relevant={props['aria-relevant']}
         ref={ref as RefObject<HTMLDivElement>}
         slot={props.slot || undefined}
         onScroll={props.onScroll}
